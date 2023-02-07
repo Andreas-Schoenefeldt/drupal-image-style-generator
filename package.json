@@ -1,0 +1,34 @@
+{
+  "name": "drupal-image-style-generator",
+  "version": "0.0.1",
+  "description": "A helper tool to automatically geenrate drupal 8+ responsive image styles",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andreas-Schoenefeldt/drupal-image-style-generator.git"
+  },
+  "keywords": [
+    "drupal"
+  ],
+  "author": "Andreas Schönefeldt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Andreas-Schoenefeldt/drupal-image-style-generator/issues"
+  },
+  "homepage": "https://github.com/Andreas-Schoenefeldt/drupal-image-style-generator#readme",
+  "devDependencies": {
+    "grunt": "^1.6.1",
+    "grunt-bump": "^0.8.0",
+    "grunt-prompt": "^1.3.3",
+    "grunt-shell": "^4.0.0",
+    "semver": "^7.3.8"
+  },
+  "dependencies": {
+    "fancy-log": "^2.0.0",
+    "js-yaml": "^4.1.0",
+    "uuid": "^9.0.0"
+  }
+}
