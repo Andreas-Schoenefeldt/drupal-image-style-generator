@@ -1,5 +1,3 @@
-import log from "fancy-log";
-
 const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder']
 
 /**
@@ -19,8 +17,9 @@ export default function (options) {
     const IMAGE_STYLE_GRID_SIZE = options.gridSize || 0; // this means, every style will be rounded up to the next divisible number of this
 
     const { v4 } = require("uuid");
-    const yaml = require('js-yaml');
-    const fs   = require('fs');
+    const yaml   = require('js-yaml');
+    const fs     = require('fs');
+    const log    = require('fancy-log');
     const breakpointsFile = themePath + '/' + themeName + '.breakpoints.yml';
     const imageStyles = {};
     const usedStyleConfigs = {};
