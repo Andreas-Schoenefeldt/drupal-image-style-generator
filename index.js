@@ -5,7 +5,7 @@ const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder']
 /**
  * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number}} options
  */
-export default function (options) {
+module.exports = function (options) {
 
     REQUIRED_OPTIONS.forEach((option) => {
         if (!options[option]) {
