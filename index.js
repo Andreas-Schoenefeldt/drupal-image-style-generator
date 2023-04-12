@@ -123,7 +123,7 @@ module.exports = function (options) {
                     const scaleEffect = helpers.getEffectByTypeId('focal_point_scale_and_crop', styleYml.effects);
                     const convertEffect = helpers.getEffectByTypeId('image_convert', styleYml.effects);
 
-                    const hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth || scaleEffect.data.height !== styleHeight ||
+                    hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth || scaleEffect.data.height !== styleHeight ||
                         (convertTo && (!convertEffect || (convertEffect && convertEffect.data.extension !== convertTo))) || (!convertTo && convertEffect)
                     ;
 
@@ -180,7 +180,7 @@ module.exports = function (options) {
                     const scaleEffect = helpers.getEffectByTypeId('image_scale', styleYml.effects);
                     const convertEffect = helpers.getEffectByTypeId('image_convert', styleYml.effects);
 
-                    const hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth ||
+                    hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth ||
                         (convertTo && (!convertEffect || (convertEffect && convertEffect.data.extension !== convertTo))) || (!convertTo && convertEffect)
                     ;
 
