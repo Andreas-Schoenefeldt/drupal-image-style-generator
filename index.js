@@ -1,7 +1,12 @@
-const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder']
+const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder'];
+const helpers = require('./src/helpers');
+const fs = require("fs");
+const yaml = require("js-yaml");
+const log = require("fancy-log");
+const {v4} = require("uuid");
 
 /**
- * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number}} options
+ * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number, convertTo?: string}} options
  */
 module.exports = function (options) {
 
@@ -11,6 +16,7 @@ module.exports = function (options) {
         }
     })
 
+    const convertTo = options.convertTo
     const themePath = options.themePath;
     const themeName = options.themeName;
     const syncFolder = options.syncFolder;
@@ -85,6 +91,8 @@ module.exports = function (options) {
                 let concreteStyleId;
                 let styleFileName;
                 let styleFilePath;
+                let styleYml;
+                let hasChanges = false;
 
                 if (aspectRatio) {
                     styleHeight = imageStyles[styleId].height ? imageStyles[styleId].height * multiplyNum : Math.round(styleWidth * aspectRatio);
@@ -97,7 +105,7 @@ module.exports = function (options) {
 
                     usedStyleConfigs[styleFileName] = true;
 
-                    const styleYml = fs.existsSync(styleFilePath) ?
+                    styleYml = fs.existsSync(styleFilePath) ?
                         yaml.load(fs.readFileSync(styleFilePath, 'utf8')) :
                         {
                             uuid: uniqueId,
@@ -112,14 +120,29 @@ module.exports = function (options) {
                         }
                     ;
 
-                    const hasChanges = Object.values(styleYml.effects).length === 0 || Object.values(styleYml.effects).some((effectConf) => {
-                        return (effectConf.data.width !== styleWidth || effectConf.data.height !== styleHeight); // the width has changed
-                    });
+                    const scaleEffect = helpers.getEffectByTypeId('focal_point_scale_and_crop', styleYml.effects);
+                    const convertEffect = helpers.getEffectByTypeId('image_convert', styleYml.effects);
+
+                    const hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth || scaleEffect.data.height !== styleHeight ||
+                        (convertTo && (!convertEffect || (convertEffect && convertEffect.data.extension !== convertTo))) || (!convertTo && convertEffect)
+                    ;
 
                     if (hasChanges) {
-                        const effectId = v4();
-
                         styleYml.effects = {};
+
+                        if (convertTo) {
+                            const convertEffectId = v4();
+                            styleYml.effects[convertEffectId] = {
+                                uuid: convertEffectId,
+                                id: 'image_convert',
+                                weight: -1,
+                                data: {
+                                    extension: convertTo
+                                }
+                            }
+                        }
+
+                        const effectId = v4();
                         styleYml.effects[effectId] = {
                             uuid: effectId,
                             id: 'focal_point_scale_and_crop',
@@ -130,14 +153,7 @@ module.exports = function (options) {
                                 crop_type: 'focal_point'
                             }
                         };
-
-                        // write the file
-                        fs.writeFileSync(styleFilePath, yaml.dump(styleYml));
-                        log('Created ' + styleFilePath);
-                    } else {
-                        log('skipping ' + styleFileName + ' - it already exists and there are no changes.');
                     }
-
                 } else {
 
                     // generate the filename
@@ -148,7 +164,7 @@ module.exports = function (options) {
 
                     usedStyleConfigs[styleFileName] = true;
 
-                    const styleYml = fs.existsSync(styleFilePath) ?
+                    styleYml = fs.existsSync(styleFilePath) ?
                         yaml.load(fs.readFileSync(styleFilePath, 'utf8')) :
                         {
                             uuid: uniqueId,
@@ -161,14 +177,29 @@ module.exports = function (options) {
                         }
                     ;
 
-                    const hasChanges = Object.values(styleYml.effects).length === 0 || Object.values(styleYml.effects).some((effectConf) => {
-                        return effectConf.data.width !== styleWidth; // the width has changed
-                    });
+                    const scaleEffect = helpers.getEffectByTypeId('image_scale', styleYml.effects);
+                    const convertEffect = helpers.getEffectByTypeId('image_convert', styleYml.effects);
+
+                    const hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth ||
+                        (convertTo && (!convertEffect || (convertEffect && convertEffect.data.extension !== convertTo))) || (!convertTo && convertEffect)
+                    ;
 
                     if (hasChanges) {
-                        const effectId = v4();
-
                         styleYml.effects = {};
+
+                        if (convertTo) {
+                            const convertEffectId = v4();
+                            styleYml.effects[convertEffectId] = {
+                                uuid: convertEffectId,
+                                id: 'image_convert',
+                                weight: -1,
+                                data: {
+                                    extension: convertTo
+                                }
+                            }
+                        }
+
+                        const effectId = v4();
                         styleYml.effects[effectId] = {
                             uuid: effectId,
                             id: 'image_scale',
@@ -179,14 +210,16 @@ module.exports = function (options) {
                                 upscale: false
                             }
                         };
-
-                        // write the file
-                        fs.writeFileSync(styleFilePath, yaml.dump(styleYml));
-                        log('Created ' + styleFilePath);
-                    } else {
-                        log('skipping ' + styleFileName + ' - it already exists and there are no changes.');
                     }
 
+                }
+
+                if (hasChanges) {
+                    // write the file
+                    fs.writeFileSync(styleFilePath, yaml.dump(styleYml));
+                    log('Created ' + styleFilePath);
+                } else {
+                    log('skipping ' + styleFileName + ' - it already exists and there are no changes.');
                 }
 
                 imageStyles[styleId].image_style_mappings.push({
