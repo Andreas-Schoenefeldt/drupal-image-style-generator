@@ -7,6 +7,7 @@ const {v4} = require("uuid");
 
 /**
  * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number, convertTo?: string}} options
+ * @returns {boolean}
  */
 module.exports = function (options) {
 
@@ -278,4 +279,6 @@ module.exports = function (options) {
     });
 
     log('Generated %d image styles for %d responsive sizes', Object.keys(usedStyleConfigs).length, Object.keys(imageStyles).length);
+
+    return true;
 }

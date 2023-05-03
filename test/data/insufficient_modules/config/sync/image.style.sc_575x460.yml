@@ -1,0 +1,17 @@
+uuid: c355cced-7038-49bd-8a3b-f8eff5166d3a
+langcode: de
+status: true
+dependencies:
+  module:
+    - focal_point
+name: sc_575x460
+label: Scale and Crop 575 x 460
+effects:
+  602e8fce-c43e-4051-a6f1-7d2a115f11c1:
+    uuid: 602e8fce-c43e-4051-a6f1-7d2a115f11c1
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 575
+      height: 460
+      crop_type: focal_point

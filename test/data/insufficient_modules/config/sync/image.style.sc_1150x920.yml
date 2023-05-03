@@ -1,0 +1,17 @@
+uuid: 3d161dd5-badb-4cdb-95f2-2dd5bd178af6
+langcode: de
+status: true
+dependencies:
+  module:
+    - focal_point
+name: sc_1150x920
+label: Scale and Crop 1150 x 920
+effects:
+  3c244430-8901-4274-ad3d-fe274f64877b:
+    uuid: 3c244430-8901-4274-ad3d-fe274f64877b
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 1150
+      height: 920
+      crop_type: focal_point
