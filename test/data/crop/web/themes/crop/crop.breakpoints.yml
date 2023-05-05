@@ -1,0 +1,25 @@
+default.xs: # mobile phones
+  label: XS
+  mediaQuery: '(max-width: 575px)'
+  weight: 0
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    frontpage_hero:
+      label: 'Frontage Hero'
+      manual_crop: true
+      aspectRatio: '165:266'
+      width: 575
+default.md: # large tablets
+  label: MD
+  mediaQuery: '(min-width: 576px) and (max-width: 991px)'
+  weight: 1
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    # assuming, that the breakpoint is at md
+    frontpage_hero:
+      width: 660
+      aspectRatio: '635:424'

@@ -57,4 +57,22 @@ describe('Running image generator tests', function () {
         }
     });
 
+    it('should generate the correct crop styles', () => {
+        const themeName = 'crop';
+        const themePath = './test/data/crop/web/themes/' + themeName;
+
+        try {
+            const res = gen({
+                themePath: themePath,
+                themeName: themeName,
+                syncFolder: './test/data/crop/config/sync/'
+            })
+
+            // just in case no exception is thrown
+            expect(res).to.be.true;
+        } catch (e) {
+            expect(e.message).to.be.undefined;
+        }
+    });
+
 });
