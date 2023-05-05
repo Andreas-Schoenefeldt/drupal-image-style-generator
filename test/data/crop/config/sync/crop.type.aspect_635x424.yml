@@ -1,10 +1,11 @@
-uuid: d56db1d9-6540-4bc8-8a4d-212e8551e456
+uuid: 698948e3-f72e-4a10-88ca-c3c8fbc2122c
 langcode: de
 status: true
 dependencies: {}
 label: Aspect Ratio 635:424
 id: aspect_635x424
 description: Aspect Ratio 635:424
+aspect_ratio: '635:424'
 soft_limit_width: 580
 soft_limit_height: 387
 hard_limit_width: null

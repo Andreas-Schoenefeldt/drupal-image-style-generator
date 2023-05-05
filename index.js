@@ -364,12 +364,20 @@ module.exports = function (options) {
                 label: type.label,
                 id: cropTypeId,
                 description: type.label,
+                aspect_ratio: type.aspect_ratio,
                 soft_limit_width: type.soft_limit_width,
                 soft_limit_height: type.soft_limit_height,
                 hard_limit_width: null,
                 hard_limit_height: null
             }
         ;
+
+        // adjust in case something changed
+        cropTypeConfig.label = type.label;
+        cropTypeConfig.description = type.label;
+        cropTypeConfig.aspect_ratio = type.aspect_ratio;
+        cropTypeConfig.soft_limit_width = type.soft_limit_width;
+        cropTypeConfig.soft_limit_height = type.soft_limit_height;
 
         usedCropTypes[cropTypeFileName] = true;
 

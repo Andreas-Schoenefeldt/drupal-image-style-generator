@@ -1,6 +1,7 @@
 const expect = require('chai').expect;
 const gen = require('../index');
 const fs = require("fs");
+const yaml = require("js-yaml");
 
 describe('Running image generator tests', function () {
 
@@ -83,6 +84,10 @@ describe('Running image generator tests', function () {
             'image.style.mc_660_aspect_165x266.yml',
             'responsive_image.styles.frontpage_hero.yml'
         ]);
+
+        const cropYml = yaml.load(fs.readFileSync(syncFolder + 'crop.type.aspect_165x266.yml', 'utf8'));
+        expect(cropYml).to.be.an('object');
+        expect(cropYml.aspect_ratio).to.equal('165:266');
     });
 
 });
