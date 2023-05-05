@@ -1,0 +1,17 @@
+uuid: f29d80a2-0be4-4ba9-945a-4c46ee1b3a9f
+langcode: de
+status: true
+dependencies:
+  module:
+    - focal_point
+name: sc_991xNaN
+label: Scale and Crop 991 x NaN
+effects:
+  e2d30ca9-76f6-4d87-9513-6fe3c075a66d:
+    uuid: e2d30ca9-76f6-4d87-9513-6fe3c075a66d
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 991
+      height: .nan
+      crop_type: focal_point

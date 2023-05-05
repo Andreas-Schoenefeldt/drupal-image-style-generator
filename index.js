@@ -1,6 +1,7 @@
 const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder'];
 const helpers = require('./src/helpers');
 const fs = require("fs");
+const path = require("path");
 const yaml = require("js-yaml");
 const log = require("fancy-log");
 const {v4} = require("uuid");
@@ -27,9 +28,15 @@ module.exports = function (options) {
     const yaml   = require('js-yaml');
     const fs     = require('fs');
     const log    = require('fancy-log');
-    const breakpointsFile = themePath + '/' + themeName + '.breakpoints.yml';
-    const imageStyles = {};
+    const modulesFile = './' + path.normalize(syncFolder + '/core.extension.yml');
+    const breakpointsFile = './' + path.normalize(themePath + '/' + themeName + '.breakpoints.yml');
+    const imageStyles = {}; // contains the single actual style definitions
     const usedStyleConfigs = {};
+    const requiredModules = {}; // contains additional custom modules, that need to be enabled before generation
+
+    if (!fs.existsSync(modulesFile)) {
+        throw new Error(`Could not find ${modulesFile} - is the sync folder configured correctly?`);
+    }
 
     if (!fs.existsSync(breakpointsFile)) {
         throw new Error(`Your configured theme has no ${breakpointsFile} theme breakpoints file. Please read the documentation and double check your options.`);
@@ -64,6 +71,12 @@ module.exports = function (options) {
                 // adjust the aspect ratio, if a new is set
                 if (bp.imageStyles[styleId].aspectRatio) {
                     imageStyles[styleId].aspectRatio = bp.imageStyles[styleId].aspectRatio;
+
+                    if (bp.imageStyles[styleId].manual_crop) {
+                        requiredModules['crop'] = true;
+                    } else {
+                        requiredModules['focal_point'] = true;
+                    }
                 }
 
                 let width = bp.imageStyles[styleId].width || parsedWidth;
@@ -233,6 +246,18 @@ module.exports = function (options) {
             });
         });
     });
+
+    // test the required modules
+    const modulesConf = yaml.load(fs.readFileSync(modulesFile, 'utf8')).module;
+    Object.keys(requiredModules).forEach((moduleName) => {
+        if (requiredModules[moduleName] && modulesConf[moduleName] !== 0) {
+            throw new Error(`Your drupal installation is missing the ${moduleName} module. Please enable it before generating the image styles.`)
+        }
+    });
+
+    console.log(modulesConf);
+    return;
+
 
     // write the actual responsive config files
     Object.keys(imageStyles).forEach((styleId) => {

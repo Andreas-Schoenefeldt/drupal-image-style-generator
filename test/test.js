@@ -39,4 +39,22 @@ describe('Running image generator tests', function () {
         }
     });
 
+    it('should test for the existence of the crop module', () => {
+        const themeName = 'no_crop';
+        const themePath = './test/data/insufficient_modules/web/themes/' + themeName;
+
+        try {
+            const res = gen({
+                themePath: themePath,
+                themeName: themeName,
+                syncFolder: './test/data/insufficient_modules/config/sync/'
+            })
+
+            // just in case no exception is thrown
+            expect(res).to.be.false;
+        } catch (e) {
+            expect(e.message).to.equal(`Your drupal installation is missing the crop module. Please enable it before generating the image styles.`);
+        }
+    });
+
 });
