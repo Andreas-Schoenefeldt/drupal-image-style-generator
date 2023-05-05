@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 const gen = require('../index');
+const fs = require("fs");
 
 describe('Running image generator tests', function () {
 
@@ -60,19 +61,28 @@ describe('Running image generator tests', function () {
     it('should generate the correct crop styles', () => {
         const themeName = 'crop';
         const themePath = './test/data/crop/web/themes/' + themeName;
+        const syncFolder = './test/data/crop/config/sync/';
 
-        try {
-            const res = gen({
-                themePath: themePath,
-                themeName: themeName,
-                syncFolder: './test/data/crop/config/sync/'
-            })
+        const res = gen({
+            themePath: themePath,
+            themeName: themeName,
+            syncFolder: syncFolder
+        })
 
-            // just in case no exception is thrown
-            expect(res).to.be.true;
-        } catch (e) {
-            expect(e.message).to.be.undefined;
-        }
+
+        expect(res).to.be.true;
+        expect(fs.readdirSync(syncFolder)).deep.equal([
+            'core.extension.yml',
+            'crop.type.aspect_165x266.yml',
+            'crop.type.aspect_635x424.yml',
+            'image.style.mc_1150_aspect_165x266.yml',
+            'image.style.mc_1320_aspect_165x266.yml',
+            'image.style.mc_290_aspect_635x424.yml',
+            'image.style.mc_575_aspect_165x266.yml',
+            'image.style.mc_580_aspect_635x424.yml',
+            'image.style.mc_660_aspect_165x266.yml',
+            'responsive_image.styles.frontpage_hero.yml'
+        ]);
     });
 
 });

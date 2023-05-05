@@ -1,4 +1,4 @@
-uuid: c355cced-7038-49bd-8a3b-f8eff5166d3a
+uuid: 5f841024-e41b-43c5-a089-86e438319de5
 langcode: de
 status: true
 dependencies:
@@ -7,8 +7,8 @@ dependencies:
 name: sc_575x460
 label: Scale and Crop 575 x 460
 effects:
-  602e8fce-c43e-4051-a6f1-7d2a115f11c1:
-    uuid: 602e8fce-c43e-4051-a6f1-7d2a115f11c1
+  c951eb35-2112-4032-9367-a722e1ab2f03:
+    uuid: c951eb35-2112-4032-9367-a722e1ab2f03
     id: focal_point_scale_and_crop
     weight: 1
     data:

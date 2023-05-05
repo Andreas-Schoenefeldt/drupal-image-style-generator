@@ -22,7 +22,7 @@ module.exports = function (options) {
     const themePath = options.themePath;
     const themeName = options.themeName;
     const syncFolder = options.syncFolder;
-    const IMAGE_STYLE_GRID_SIZE = options.gridSize || 0; // this means, every style will be rounded up to the next divisible number of this
+    const IMAGE_STYLE_GRID_SIZE = options.gridSize || 1; // this means, every style will be rounded up to the next divisible number of this
 
     const { v4 } = require("uuid");
     const yaml   = require('js-yaml');
@@ -31,6 +31,8 @@ module.exports = function (options) {
     const modulesFile = './' + path.normalize(syncFolder + '/core.extension.yml');
     const breakpointsFile = './' + path.normalize(themePath + '/' + themeName + '.breakpoints.yml');
     const imageStyles = {}; // contains the single actual style definitions
+    const cropTypes = {}; // contains potentially required crop types
+    const usedCropTypes = {};
     const usedStyleConfigs = {};
     const requiredModules = {}; // contains additional custom modules, that need to be enabled before generation
 
@@ -66,13 +68,14 @@ module.exports = function (options) {
                     imageStyles[styleId].image_style_mappings = [];
 
                     imageStyles[styleId].widths = {};
+                    imageStyles[styleId].cropTypes = {};
                 }
 
                 // adjust the aspect ratio, if a new is set
                 if (bp.imageStyles[styleId].aspectRatio) {
                     imageStyles[styleId].aspectRatio = bp.imageStyles[styleId].aspectRatio;
 
-                    if (bp.imageStyles[styleId].manual_crop) {
+                    if (imageStyles[styleId].manual_crop) {
                         requiredModules['crop'] = true;
                     } else {
                         requiredModules['focal_point'] = true;
@@ -87,16 +90,21 @@ module.exports = function (options) {
                 // set the new width
                 imageStyles[styleId].width = width;
                 imageStyles[styleId].widths[bpName] = imageStyles[styleId].width;
+
+                if (imageStyles[styleId].manual_crop) {
+                    imageStyles[styleId].cropTypes[bpName] = 'aspect_' + imageStyles[styleId].aspectRatio.replace(':', 'x');
+                }
+
             });
         }
 
         // loop over all the image styles
         Object.keys(imageStyles).forEach((styleId) => {
             bp.multipliers.forEach((multiplier) => {
-
                 const multiplyNum = parseFloat(multiplier);
                 const styleWidth = (imageStyles[styleId].widths[bpName] || parsedWidth) * multiplyNum;
                 const aspectRatio = imageStyles[styleId].aspectRatio;
+                const manualCrop = imageStyles[styleId].manual_crop;
 
                 const uniqueId = v4();
 
@@ -106,18 +114,31 @@ module.exports = function (options) {
                 let styleFileName;
                 let styleFilePath;
                 let styleYml;
-                let hasChanges = false;
+                let hasChanges;
 
-                if (aspectRatio) {
-                    styleHeight = imageStyles[styleId].height ? imageStyles[styleId].height * multiplyNum : Math.round(styleWidth * aspectRatio);
+                if (manualCrop) {
+                    const cropType = imageStyles[styleId].cropTypes[bpName];
+                    const cropDimensions = cropType.split('_')[1].split('x').map((num) => {
+                        return parseInt(num, 10);
+                    });
+                    const aspectRatio = cropDimensions[1] / cropDimensions[0];
 
-                    // generate the filename
-                    styleLabel = `Scale and Crop ${styleWidth} x ${styleHeight}`;
-                    concreteStyleId = `sc_${styleWidth}x${styleHeight}`;
+                    if (!cropTypes[cropType]) {
+                        cropTypes[cropType] = {
+                            label: `Aspect Ratio ${cropDimensions[0]}:${cropDimensions[1]}`,
+                            aspect_ratio: `${cropDimensions[0]}:${cropDimensions[1]}`,
+                            soft_limit_width: styleWidth,
+                            soft_limit_height: Math.round(styleWidth * aspectRatio)
+                        }
+                    } else {
+                        cropTypes[cropType].soft_limit_width = Math.max(cropTypes[cropType].soft_limit_width, styleWidth);
+                        cropTypes[cropType].soft_limit_height = Math.round(Math.max(cropTypes[cropType].soft_limit_height, styleWidth * aspectRatio));
+                    }
+
+                    styleLabel = `Manual Crop and Scale ${styleWidth}`;
+                    concreteStyleId = `mc_${styleWidth}_${cropType}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
-
-                    usedStyleConfigs[styleFileName] = true;
 
                     styleYml = fs.existsSync(styleFilePath) ?
                         yaml.load(fs.readFileSync(styleFilePath, 'utf8')) :
@@ -126,7 +147,80 @@ module.exports = function (options) {
                             langcode: 'de',
                             status: true,
                             dependencies: {
-                                module: ['focal_point'] // @todo - parse the module config and check, if focal point is enabled
+                                config: ['crop.type.' + cropType],
+                                module: ['crop']
+                            },
+                            name: concreteStyleId,
+                            label: styleLabel,
+                            effects: {}
+                        }
+                    ;
+
+                    const convertEffect = helpers.getEffectByTypeId('image_convert', styleYml.effects);
+                    const cropEffect = helpers.getEffectByTypeId('crop_crop', styleYml.effects);
+                    const scaleEffect = helpers.getEffectByTypeId('image_scale', styleYml.effects);
+
+                    hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth ||
+                        !cropEffect || cropEffect.data.crop_type !== cropType ||
+                        (convertTo && (!convertEffect || (convertEffect && convertEffect.data.extension !== convertTo))) || (!convertTo && convertEffect)
+                    ;
+
+                    if (hasChanges) {
+                        styleYml.effects = {};
+
+                        if (convertTo) {
+                            const convertEffectId = v4();
+                            styleYml.effects[convertEffectId] = {
+                                uuid: convertEffectId,
+                                id: 'image_convert',
+                                weight: -1,
+                                data: {
+                                    extension: convertTo
+                                }
+                            }
+                        }
+
+                        const effectId = v4();
+                        styleYml.effects[effectId] = {
+                            uuid: effectId,
+                            id: 'crop_crop',
+                            weight: 1,
+                            data: {
+                                crop_type: cropType,
+                                automatic_crop_provider: null
+                            }
+                        };
+
+                        const scaleEffectId = v4();
+                        styleYml.effects[scaleEffectId] = {
+                            uuid: scaleEffectId,
+                            id: 'image_scale',
+                            weight: 2,
+                            data: {
+                                width: styleWidth,
+                                height: null,
+                                upscale: false
+                            }
+                        };
+                    }
+
+                } else if (aspectRatio) {
+                    styleHeight = imageStyles[styleId].height ? imageStyles[styleId].height * multiplyNum : Math.round(styleWidth * aspectRatio);
+
+                    // generate the filename
+                    styleLabel = `Scale and Crop ${styleWidth} x ${styleHeight}`;
+                    concreteStyleId = `sc_${styleWidth}x${styleHeight}`;
+                    styleFileName = `image.style.${concreteStyleId}.yml`;
+                    styleFilePath = `${syncFolder}/${styleFileName}`;
+
+                    styleYml = fs.existsSync(styleFilePath) ?
+                        yaml.load(fs.readFileSync(styleFilePath, 'utf8')) :
+                        {
+                            uuid: uniqueId,
+                            langcode: 'de',
+                            status: true,
+                            dependencies: {
+                                module: ['focal_point']
                             },
                             name: concreteStyleId,
                             label: styleLabel,
@@ -176,8 +270,6 @@ module.exports = function (options) {
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
 
-                    usedStyleConfigs[styleFileName] = true;
-
                     styleYml = fs.existsSync(styleFilePath) ?
                         yaml.load(fs.readFileSync(styleFilePath, 'utf8')) :
                         {
@@ -225,8 +317,9 @@ module.exports = function (options) {
                             }
                         };
                     }
-
                 }
+
+                usedStyleConfigs[styleFileName] = true;
 
                 if (hasChanges) {
                     // write the file
@@ -255,9 +348,34 @@ module.exports = function (options) {
         }
     });
 
-    console.log(modulesConf);
-    return;
+    // write the actual crop types files
+    Object.keys(cropTypes).forEach((cropTypeId) => {
+        const type = cropTypes[cropTypeId];
+        const cropTypeFileName = `crop.type.${cropTypeId}.yml`;
+        const cropTypePath = `${syncFolder}/${cropTypeFileName}`;
+        const uniqueId = v4();
+        const cropTypeConfig = fs.existsSync(cropTypePath) ?
+            yaml.load(fs.readFileSync(cropTypePath, 'utf8')) :
+            {
+                uuid: uniqueId,
+                langcode: 'de',
+                status: true,
+                dependencies: {},
+                label: type.label,
+                id: cropTypeId,
+                description: type.label,
+                soft_limit_width: type.soft_limit_width,
+                soft_limit_height: type.soft_limit_height,
+                hard_limit_width: null,
+                hard_limit_height: null
+            }
+        ;
 
+        usedCropTypes[cropTypeFileName] = true;
+
+        fs.writeFileSync(cropTypePath, yaml.dump(cropTypeConfig));
+        log('Created crop type ' + cropTypePath);
+    });
 
     // write the actual responsive config files
     Object.keys(imageStyles).forEach((styleId) => {
@@ -297,7 +415,10 @@ module.exports = function (options) {
     const configFiles = fs.readdirSync(syncFolder);
 
     configFiles.forEach(file => {
-        if ((file.indexOf('image.style.sc_') === 0 || file.indexOf('image.style.s_') === 0) && !usedStyleConfigs[file]) {
+        if (
+            ((file.indexOf('image.style.sc_') === 0 || file.indexOf('image.style.s_') === 0 || file.indexOf('image.style.mc_') === 0) && !usedStyleConfigs[file]) ||
+            (file.indexOf('crop.type.aspect_') === 0 && !usedCropTypes[file])
+        ) {
             fs.rmSync(`${syncFolder}/${file}`);
             console.log('%o is unused and was removed.', file);
         }

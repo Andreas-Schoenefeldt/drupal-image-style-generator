@@ -1,4 +1,4 @@
-uuid: 3d161dd5-badb-4cdb-95f2-2dd5bd178af6
+uuid: d0c5b014-4002-4e45-bae8-18b5087e3c69
 langcode: de
 status: true
 dependencies:
@@ -7,8 +7,8 @@ dependencies:
 name: sc_1150x920
 label: Scale and Crop 1150 x 920
 effects:
-  3c244430-8901-4274-ad3d-fe274f64877b:
-    uuid: 3c244430-8901-4274-ad3d-fe274f64877b
+  9b83e6ab-740a-4224-95ba-06365f2f109b:
+    uuid: 9b83e6ab-740a-4224-95ba-06365f2f109b
     id: focal_point_scale_and_crop
     weight: 1
     data:

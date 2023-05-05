@@ -1,0 +1,17 @@
+uuid: 60492e17-be04-4806-889f-041d1020a1d8
+langcode: de
+status: true
+dependencies:
+  module:
+    - focal_point
+name: sc_660x436
+label: Scale and Crop 660 x 436
+effects:
+  87885a34-47ca-44b4-aa89-ba63f0bca648:
+    uuid: 87885a34-47ca-44b4-aa89-ba63f0bca648
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 660
+      height: 436
+      crop_type: focal_point

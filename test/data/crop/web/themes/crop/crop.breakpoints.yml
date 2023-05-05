@@ -22,4 +22,14 @@ default.md: # large tablets
     # assuming, that the breakpoint is at md
     frontpage_hero:
       width: 660
+default.lg: # desktop
+  label: LG
+  mediaQuery: '(min-width: 992px) and (max-width: 1199px)'
+  weight: 3
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    frontpage_hero:
+      width: 290
       aspectRatio: '635:424'

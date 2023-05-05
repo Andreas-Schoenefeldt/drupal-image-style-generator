@@ -1,0 +1,11 @@
+uuid: bc4efe45-64e9-4a95-8a82-44d5569741dd
+langcode: de
+status: true
+dependencies: {}
+label: Aspect Ratio 165:266
+id: aspect_165x266
+description: Aspect Ratio 165:266
+soft_limit_width: 1320
+soft_limit_height: 2128
+hard_limit_width: null
+hard_limit_height: null

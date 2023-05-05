@@ -1,0 +1,42 @@
+uuid: 94e0beb1-7f8a-4b34-ad42-1c840f937c77
+langcode: de
+status: true
+dependencies:
+  config:
+    - image.style.mc_575_aspect_165x266
+    - image.style.mc_1150_aspect_165x266
+    - image.style.mc_660_aspect_165x266
+    - image.style.mc_1320_aspect_165x266
+    - image.style.mc_290_aspect_635x424
+    - image.style.mc_580_aspect_635x424
+  theme:
+    - crop
+id: frontpage_hero
+label: Frontage Hero
+image_style_mappings:
+  - breakpoint_id: default.xs
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: mc_575_aspect_165x266
+  - breakpoint_id: default.xs
+    multiplier: 2x
+    image_mapping_type: image_style
+    image_mapping: mc_1150_aspect_165x266
+  - breakpoint_id: default.md
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: mc_660_aspect_165x266
+  - breakpoint_id: default.md
+    multiplier: 2x
+    image_mapping_type: image_style
+    image_mapping: mc_1320_aspect_165x266
+  - breakpoint_id: default.lg
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: mc_290_aspect_635x424
+  - breakpoint_id: default.lg
+    multiplier: 2x
+    image_mapping_type: image_style
+    image_mapping: mc_580_aspect_635x424
+breakpoint_group: crop
+fallback_image_style: mc_575_aspect_165x266

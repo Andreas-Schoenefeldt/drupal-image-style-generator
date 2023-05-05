@@ -1,0 +1,26 @@
+uuid: 5cb45f65-ff19-4258-b01d-700fc3419bb2
+langcode: de
+status: true
+dependencies:
+  config:
+    - crop.type.aspect_165x266
+  module:
+    - crop
+name: mc_575_aspect_165x266
+label: Manual Crop and Scale 575
+effects:
+  5b2132b5-ad86-4e85-9de9-493f51077829:
+    uuid: 5b2132b5-ad86-4e85-9de9-493f51077829
+    id: crop_crop
+    weight: 1
+    data:
+      crop_type: aspect_165x266
+      automatic_crop_provider: null
+  23efa495-ce42-4a81-bcc5-00b59c5f6432:
+    uuid: 23efa495-ce42-4a81-bcc5-00b59c5f6432
+    id: image_scale
+    weight: 2
+    data:
+      width: 575
+      height: null
+      upscale: false
