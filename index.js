@@ -135,7 +135,7 @@ module.exports = function (options) {
                         cropTypes[cropType].soft_limit_height = Math.round(Math.max(cropTypes[cropType].soft_limit_height, styleWidth * aspectRatio));
                     }
 
-                    styleLabel = `Manual Crop and Scale ${styleWidth}`;
+                    styleLabel = `Manual Crop and Scale ${styleWidth}, aspect ${cropDimensions[0]}:${cropDimensions[1]}`;
                     concreteStyleId = `mc_${styleWidth}_${cropType}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
