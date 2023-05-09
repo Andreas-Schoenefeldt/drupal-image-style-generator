@@ -1,13 +1,9 @@
 const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder'];
 const helpers = require('./src/helpers');
-const fs = require("fs");
 const path = require("path");
-const yaml = require("js-yaml");
-const log = require("fancy-log");
-const {v4} = require("uuid");
 
 /**
- * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number, convertTo?: string}} options
+ * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number, convertTo?: string, clearCropTypes?: boolean}} options
  * @returns {boolean}
  */
 module.exports = function (options) {
@@ -425,7 +421,7 @@ module.exports = function (options) {
     configFiles.forEach(file => {
         if (
             ((file.indexOf('image.style.sc_') === 0 || file.indexOf('image.style.s_') === 0 || file.indexOf('image.style.mc_') === 0) && !usedStyleConfigs[file]) ||
-            (file.indexOf('crop.type.aspect_') === 0 && !usedCropTypes[file])
+            (options.clearCropTypes && file.indexOf('crop.type.aspect_') === 0 && !usedCropTypes[file])
         ) {
             fs.rmSync(`${syncFolder}/${file}`);
             console.log('%o is unused and was removed.', file);
