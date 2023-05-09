@@ -50,5 +50,7 @@ gen({
 
 **gridSize**: (Default: 0) Number to which grid the images are rounded up. In the worst case, the image is gridSize - 1 px to big for the breakpoint, but a higher grid will result in lower individual image styles.
 
-**convertTo**: (Default: null) enables the image_convert style - allowed values are `png`,  `jpg`, `jpeg`, `jpe`, `gif`, `webp` 
+**convertTo**: (Default: null) enables the image_convert style - allowed values are `png`,  `jpg`, `jpeg`, `jpe`, `gif`, `webp`
+
+**clearCropTypes**: (Default: null) If set to true, unused `crop.type.aspect_*.yml` files will be removed. This can cause a lot of trouble and require you to remove all existing crop definition entities. Should not be done in a live site.  
 
