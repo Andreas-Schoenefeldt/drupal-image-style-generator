@@ -1,6 +1,8 @@
 const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder'];
 const helpers = require('./src/helpers');
 const path = require("path");
+const yaml = require("js-yaml");
+const {v4} = require("uuid");
 
 /**
  * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number, convertTo?: string, clearCropTypes?: boolean}} options
@@ -64,6 +66,7 @@ module.exports = function (options) {
                     imageStyles[styleId].image_style_mappings = [];
 
                     imageStyles[styleId].widths = {};
+                    imageStyles[styleId].heights = {};
                     imageStyles[styleId].cropTypes = {};
                 }
 
@@ -78,14 +81,24 @@ module.exports = function (options) {
                     }
                 }
 
-                let width = bp.imageStyles[styleId].width || parsedWidth;
+                let height = bp.imageStyles[styleId].height || imageStyles[styleId].height; // if height is set once, this is set
 
-                // adjust the width to the grid, so we save a couple of image styles
-                width = Math.ceil(width / IMAGE_STYLE_GRID_SIZE) * IMAGE_STYLE_GRID_SIZE;
+                if (height) {
+                    // set the new height
+                    imageStyles[styleId].height = height;
+                    imageStyles[styleId].heights[bpName] = height;
+                }
 
-                // set the new width
-                imageStyles[styleId].width = width;
-                imageStyles[styleId].widths[bpName] = imageStyles[styleId].width;
+                if (!height || bp.imageStyles[styleId].width) {
+                    let width = bp.imageStyles[styleId].width || parsedWidth;
+
+                    // adjust the width to the grid, so we save a couple of image styles
+                    width = Math.ceil(width / IMAGE_STYLE_GRID_SIZE) * IMAGE_STYLE_GRID_SIZE;
+
+                    // set the new width
+                    imageStyles[styleId].width = width;
+                    imageStyles[styleId].widths[bpName] = imageStyles[styleId].width;
+                }
 
                 if (imageStyles[styleId].manual_crop) {
                     imageStyles[styleId].cropTypes[bpName] = 'aspect_' + imageStyles[styleId].aspectRatio.replace(':', 'x');
@@ -258,6 +271,62 @@ module.exports = function (options) {
                             }
                         };
                     }
+                } else if (imageStyles[styleId].height) {
+                    // this is a height style
+                    const styleHeight = imageStyles[styleId].heights[bpName] * multiplyNum;
+                    styleLabel = `Scale Height ${styleHeight}`;
+                    concreteStyleId = `sh_${styleHeight}`;
+                    styleFileName = `image.style.${concreteStyleId}.yml`;
+                    styleFilePath = `${syncFolder}/${styleFileName}`;
+
+                    styleYml = fs.existsSync(styleFilePath) ?
+                        yaml.load(fs.readFileSync(styleFilePath, 'utf8')) :
+                        {
+                            uuid: uniqueId,
+                            langcode: 'de',
+                            status: true,
+                            dependencies: {},
+                            name: concreteStyleId,
+                            label: styleLabel,
+                            effects: {}
+                        }
+                    ;
+
+                    const scaleEffect = helpers.getEffectByTypeId('image_scale', styleYml.effects);
+                    const convertEffect = helpers.getEffectByTypeId('image_convert', styleYml.effects);
+
+                    hasChanges = !scaleEffect || scaleEffect.data.height !== styleHeight ||
+                        (convertTo && (!convertEffect || (convertEffect && convertEffect.data.extension !== convertTo))) || (!convertTo && convertEffect)
+                    ;
+
+                    if (hasChanges) {
+                        styleYml.effects = {};
+
+                        if (convertTo) {
+                            const convertEffectId = v4();
+                            styleYml.effects[convertEffectId] = {
+                                uuid: convertEffectId,
+                                id: 'image_convert',
+                                weight: -1,
+                                data: {
+                                    extension: convertTo
+                                }
+                            }
+                        }
+
+                        const effectId = v4();
+                        styleYml.effects[effectId] = {
+                            uuid: effectId,
+                            id: 'image_scale',
+                            weight: 1,
+                            data: {
+                                width: null,
+                                height: styleHeight,
+                                upscale: false
+                            }
+                        };
+                    }
+
                 } else {
 
                     // generate the filename

@@ -1,0 +1,42 @@
+uuid: 82f42ee2-56b7-43a9-8e80-a8d8d0d2fe0c
+langcode: de
+status: true
+dependencies:
+  config:
+    - image.style.sh_38
+    - image.style.sh_76
+    - image.style.sh_88
+    - image.style.sh_176
+    - image.style.sh_108
+    - image.style.sh_216
+  theme:
+    - height
+id: height_hero
+label: Height Hero
+image_style_mappings:
+  - breakpoint_id: default.xs
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: sh_38
+  - breakpoint_id: default.xs
+    multiplier: 2x
+    image_mapping_type: image_style
+    image_mapping: sh_76
+  - breakpoint_id: default.md
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: sh_88
+  - breakpoint_id: default.md
+    multiplier: 2x
+    image_mapping_type: image_style
+    image_mapping: sh_176
+  - breakpoint_id: default.lg
+    multiplier: 1x
+    image_mapping_type: image_style
+    image_mapping: sh_108
+  - breakpoint_id: default.lg
+    multiplier: 2x
+    image_mapping_type: image_style
+    image_mapping: sh_216
+breakpoint_group: height
+fallback_image_style: sh_38

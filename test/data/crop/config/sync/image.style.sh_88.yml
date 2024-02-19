@@ -1,0 +1,15 @@
+uuid: 2d2a2c04-b28b-4a35-a500-150815f3d280
+langcode: de
+status: true
+dependencies: {}
+name: sh_88
+label: Scale Height 88
+effects:
+  91e17ce1-80b6-44db-8faf-5843921dc975:
+    uuid: 91e17ce1-80b6-44db-8faf-5843921dc975
+    id: image_scale
+    weight: 1
+    data:
+      width: null
+      height: 88
+      upscale: false

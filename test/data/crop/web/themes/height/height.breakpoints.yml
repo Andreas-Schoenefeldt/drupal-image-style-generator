@@ -1,0 +1,32 @@
+default.xs: # mobile phones
+  label: XS
+  mediaQuery: '(max-width: 575px)'
+  weight: 0
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    height_hero:
+      label: 'Height Hero'
+      height: 38
+default.md: # large tablets
+  label: MD
+  mediaQuery: '(min-width: 576px) and (max-width: 991px)'
+  weight: 1
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    # assuming, that the breakpoint is at md
+    height_hero:
+      height: 88
+default.lg: # desktop
+  label: LG
+  mediaQuery: '(min-width: 992px) and (max-width: 1199px)'
+  weight: 3
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    height_hero:
+      height: 108

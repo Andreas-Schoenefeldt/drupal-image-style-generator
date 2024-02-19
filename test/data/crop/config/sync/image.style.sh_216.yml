@@ -1,0 +1,15 @@
+uuid: 284b7900-d250-49e6-aedf-56d2e915877a
+langcode: de
+status: true
+dependencies: {}
+name: sh_216
+label: Scale Height 216
+effects:
+  b2ba04fe-b48e-458e-9c00-014a5dfa3195:
+    uuid: b2ba04fe-b48e-458e-9c00-014a5dfa3195
+    id: image_scale
+    weight: 1
+    data:
+      width: null
+      height: 216
+      upscale: false
