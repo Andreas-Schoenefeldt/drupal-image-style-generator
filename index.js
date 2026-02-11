@@ -1,8 +1,6 @@
 const REQUIRED_OPTIONS = ['themePath', 'themeName', 'syncFolder'];
 const helpers = require('./src/helpers');
 const path = require("path");
-const yaml = require("js-yaml");
-const {v4} = require("uuid");
 
 /**
  * @param {{themePath: string, themeName: string, syncFolder: string, gridSize?: number, convertTo?: string, clearCropTypes?: boolean}} options
@@ -438,8 +436,8 @@ module.exports = function (options) {
         ;
 
         // adjust in case something changed
-        cropTypeConfig.label = type.label;
-        cropTypeConfig.description = type.label;
+        cropTypeConfig.label = type.label || cropTypeConfig.label || cropTypeId.replace("_", " ");
+        cropTypeConfig.description = cropTypeConfig.label;
         cropTypeConfig.aspect_ratio = type.aspect_ratio;
         cropTypeConfig.soft_limit_width = type.soft_limit_width;
         cropTypeConfig.soft_limit_height = type.soft_limit_height;

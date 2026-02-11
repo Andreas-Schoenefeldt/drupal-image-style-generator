@@ -30,3 +30,13 @@ default.lg: # desktop
   imageStyles:
     height_hero:
       height: 108
+default.xl: # desktop
+  label: XL
+  mediaQuery: 'min-width: 1200px'
+  weight: 3
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    height_hero:
+      height: 108
