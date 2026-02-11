@@ -26,7 +26,7 @@ module.exports = function (options) {
     const log    = require('fancy-log');
     const modulesFile = './' + path.normalize(syncFolder + '/core.extension.yml');
     const breakpointsFile = './' + path.normalize(themePath + '/' + themeName + '.breakpoints.yml');
-    const imageStyles = {}; // contains the single actual style definitions
+    const responsiveImageStyles = {}; // contains the single actual style definitions
     const cropTypes = {}; // contains potentially required crop types
     const usedCropTypes = {};
     const usedStyleConfigs = {};
@@ -59,32 +59,32 @@ module.exports = function (options) {
         // update all available image styles
         if (bp.imageStyles) {
             Object.keys(bp.imageStyles).forEach((styleId) => {
-                if (!imageStyles[styleId]) {
-                    imageStyles[styleId] = bp.imageStyles[styleId];
-                    imageStyles[styleId].image_style_mappings = [];
+                if (!responsiveImageStyles[styleId]) {
+                    responsiveImageStyles[styleId] = bp.imageStyles[styleId];
+                    responsiveImageStyles[styleId].image_style_mappings = [];
 
-                    imageStyles[styleId].widths = {};
-                    imageStyles[styleId].heights = {};
-                    imageStyles[styleId].cropTypes = {};
+                    responsiveImageStyles[styleId].widths = {};
+                    responsiveImageStyles[styleId].heights = {};
+                    responsiveImageStyles[styleId].cropTypes = {};
                 }
 
                 // adjust the aspect ratio, if a new is set
                 if (bp.imageStyles[styleId].aspectRatio) {
-                    imageStyles[styleId].aspectRatio = bp.imageStyles[styleId].aspectRatio;
+                    responsiveImageStyles[styleId].aspectRatio = bp.imageStyles[styleId].aspectRatio;
 
-                    if (imageStyles[styleId].manual_crop) {
+                    if (responsiveImageStyles[styleId].manual_crop) {
                         requiredModules['crop'] = true;
                     } else {
                         requiredModules['focal_point'] = true;
                     }
                 }
 
-                let height = bp.imageStyles[styleId].height || imageStyles[styleId].height; // if height is set once, this is set
+                let height = bp.imageStyles[styleId].height || responsiveImageStyles[styleId].height; // if height is set once, this is set
 
                 if (height) {
                     // set the new height
-                    imageStyles[styleId].height = height;
-                    imageStyles[styleId].heights[bpName] = height;
+                    responsiveImageStyles[styleId].height = height;
+                    responsiveImageStyles[styleId].heights[bpName] = height;
                 }
 
                 if (!height || bp.imageStyles[styleId].width) {
@@ -94,24 +94,24 @@ module.exports = function (options) {
                     width = Math.ceil(width / IMAGE_STYLE_GRID_SIZE) * IMAGE_STYLE_GRID_SIZE;
 
                     // set the new width
-                    imageStyles[styleId].width = width;
-                    imageStyles[styleId].widths[bpName] = imageStyles[styleId].width;
+                    responsiveImageStyles[styleId].width = width;
+                    responsiveImageStyles[styleId].widths[bpName] = responsiveImageStyles[styleId].width;
                 }
 
-                if (imageStyles[styleId].manual_crop) {
-                    imageStyles[styleId].cropTypes[bpName] = 'aspect_' + imageStyles[styleId].aspectRatio.replace(':', 'x');
+                if (responsiveImageStyles[styleId].manual_crop) {
+                    responsiveImageStyles[styleId].cropTypes[bpName] = 'aspect_' + responsiveImageStyles[styleId].aspectRatio.replace(':', 'x');
                 }
 
             });
         }
 
         // loop over all the image styles
-        Object.keys(imageStyles).forEach((styleId) => {
+        Object.keys(responsiveImageStyles).forEach((styleId) => {
             bp.multipliers.forEach((multiplier) => {
                 const multiplyNum = parseFloat(multiplier);
-                const styleWidth = (imageStyles[styleId].widths[bpName] || parsedWidth) * multiplyNum;
-                const aspectRatio = imageStyles[styleId].aspectRatio;
-                const manualCrop = imageStyles[styleId].manual_crop;
+                const styleWidth = (responsiveImageStyles[styleId].widths[bpName] || parsedWidth) * multiplyNum;
+                const aspectRatio = responsiveImageStyles[styleId].aspectRatio;
+                const manualCrop = responsiveImageStyles[styleId].manual_crop;
 
                 const uniqueId = v4();
 
@@ -124,7 +124,7 @@ module.exports = function (options) {
                 let hasChanges;
 
                 if (manualCrop) {
-                    const cropType = imageStyles[styleId].cropTypes[bpName];
+                    const cropType = responsiveImageStyles[styleId].cropTypes[bpName];
                     const cropDimensions = cropType.split('_')[1].split('x').map((num) => {
                         return parseInt(num, 10);
                     });
@@ -212,7 +212,7 @@ module.exports = function (options) {
                     }
 
                 } else if (aspectRatio) {
-                    styleHeight = imageStyles[styleId].height ? imageStyles[styleId].height * multiplyNum : Math.round(styleWidth * aspectRatio);
+                    styleHeight = responsiveImageStyles[styleId].height ? responsiveImageStyles[styleId].height * multiplyNum : Math.round(styleWidth * aspectRatio);
 
                     // generate the filename
                     styleLabel = `Scale and Crop ${styleWidth} x ${styleHeight}`;
@@ -264,14 +264,14 @@ module.exports = function (options) {
                             weight: 1,
                             data: {
                                 width: styleWidth,
-                                height: imageStyles[styleId].height ? imageStyles[styleId].height * multiplyNum : Math.round(styleWidth * imageStyles[styleId].aspectRatio),
+                                height: responsiveImageStyles[styleId].height ? responsiveImageStyles[styleId].height * multiplyNum : Math.round(styleWidth * responsiveImageStyles[styleId].aspectRatio),
                                 crop_type: 'focal_point'
                             }
                         };
                     }
-                } else if (imageStyles[styleId].height) {
+                } else if (responsiveImageStyles[styleId].height) {
                     // this is a height style
-                    const styleHeight = imageStyles[styleId].heights[bpName] * multiplyNum;
+                    const styleHeight = responsiveImageStyles[styleId].heights[bpName] * multiplyNum;
                     styleLabel = `Scale Height ${styleHeight}`;
                     concreteStyleId = `sh_${styleHeight}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
@@ -392,7 +392,7 @@ module.exports = function (options) {
                     log('skipping ' + styleFileName + ' - it already exists and there are no changes.');
                 }
 
-                imageStyles[styleId].image_style_mappings.push({
+                responsiveImageStyles[styleId].image_style_mappings.push({
                     breakpoint_id: bpName,
                     multiplier: multiplier,
                     image_mapping_type: 'image_style',
@@ -436,7 +436,7 @@ module.exports = function (options) {
         ;
 
         // adjust in case something changed
-        cropTypeConfig.label = type.label || cropTypeConfig.label || cropTypeId.replace("_", " ");
+        cropTypeConfig.label = type.label;
         cropTypeConfig.description = cropTypeConfig.label;
         cropTypeConfig.aspect_ratio = type.aspect_ratio;
         cropTypeConfig.soft_limit_width = type.soft_limit_width;
@@ -449,7 +449,7 @@ module.exports = function (options) {
     });
 
     // write the actual responsive config files
-    Object.keys(imageStyles).forEach((styleId) => {
+    Object.keys(responsiveImageStyles).forEach((styleId) => {
         const responsiveImagePath = `${syncFolder}/responsive_image.styles.${styleId}.yml`;
         const uniqueId = v4();
         const responsiveConfig = fs.existsSync(responsiveImagePath) ?
@@ -463,13 +463,15 @@ module.exports = function (options) {
                     theme: [themeName]
                 },
                 id: styleId,
-                label: imageStyles[styleId].label,
+                label: responsiveImageStyles[styleId].label,
                 image_style_mappings: [],
                 breakpoint_group: themeName
             }
         ;
 
-        const mappings = imageStyles[styleId].image_style_mappings;
+        responsiveConfig.label = responsiveImageStyles[styleId].label || responsiveConfig.label || styleId.replaceAll('_', ' ');
+
+        const mappings = responsiveImageStyles[styleId].image_style_mappings;
 
         responsiveConfig.dependencies.config = mappings.map((mapping) => {
             return 'image.style.' + mapping.image_mapping;
@@ -495,7 +497,7 @@ module.exports = function (options) {
         }
     });
 
-    log('Generated %d image styles for %d responsive sizes', Object.keys(usedStyleConfigs).length, Object.keys(imageStyles).length);
+    log('Generated %d image styles for %d responsive sizes', Object.keys(usedStyleConfigs).length, Object.keys(responsiveImageStyles).length);
 
     return true;
 }
