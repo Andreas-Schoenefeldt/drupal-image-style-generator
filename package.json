@@ -1,6 +1,6 @@
 {
   "name": "drupal-image-style-generator",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A helper tool to automatically geenrate drupal 8+ responsive image styles",
   "main": "index.js",
   "scripts": {
