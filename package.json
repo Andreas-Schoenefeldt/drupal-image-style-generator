@@ -1,10 +1,11 @@
 {
   "name": "drupal-image-style-generator",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "A helper tool to automatically geenrate drupal 8+ responsive image styles",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+    "release": "grunt release"
   },
   "repository": {
     "type": "git",
