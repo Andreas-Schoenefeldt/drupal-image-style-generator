@@ -126,4 +126,22 @@ describe('Running image generator tests', function () {
         expect(effect.data.height).to.equal(108);
     });
 
+    it('should generate the correct aspect styles and scss files', () => {
+        const themeName = 'changing_aspect';
+        const themePath = './test/data/crop/web/themes/' + themeName;
+        const syncFolder = './test/data/crop/config/sync/';
+        const stylesOutDir = themePath + '/assets/scss';
+
+        const res = gen({
+            themePath: themePath,
+            themeName: themeName,
+            syncFolder: syncFolder,
+            styleConfig: {
+                outDir: stylesOutDir
+            }
+        });
+
+        expect(res).to.be.true;
+    });
+
 });

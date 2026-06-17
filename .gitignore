@@ -107,3 +107,4 @@ dist
 /test/data/crop/config/sync/
 !/test/data/crop/config/sync/.gitkeep
 !/test/data/crop/config/sync/core.extension.yml
+/test/data/crop/web/themes/changing_aspect/assets/scss/
