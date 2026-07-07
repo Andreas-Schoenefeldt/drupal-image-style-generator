@@ -3,17 +3,32 @@ Drupal Image Style Generator
 
 Allows to generate drupal image styles, based on the `theme.breakpoints.yml` in the theme.
 
+## Installation
+
+```shell
+npm i --save-dev drupal-image-style-generator
+```
+
+## Setup
 
 configure the width and spect ratio of styles per breakpoint: .xs .sm .md .lg .xl
 
 ```
-imageStyles:
-  header_location:
-    label: 'Header Standort'
-    aspectRatio: 0.59
-    width: 545
+theme.xs_name:
+  label: XS
+  mediaQuery: "(max-width: 575px)"
+  weight: 1
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    header_location:
+      label: 'Header Standort'
+      aspectRatio: 0.59
+      width: 545
 ```
 
+Aspect ratio is calculated height / with. As an example, `16:9` has an spectRatio of `0.563`.
 
 ```
 col_8:
@@ -24,7 +39,7 @@ col_8:
 
 ## Usage
 
-Can be used in your script (grunt or gulp):
+Can be used in your build script (standalone, grunt or gulp):
 
 ```js
 const gen = require('drupal-image-style-generator');
@@ -46,9 +61,11 @@ gen({
 
 **themeName**: the name of the theme
 
-**syncFolder**: Relative path to the sync folder
+**syncFolder**: Relative path to the drupal config sync folder
 
 **gridSize**: (Default: 0) Number to which grid the images are rounded up. In the worst case, the image is gridSize - 1 px to big for the breakpoint, but a higher grid will result in lower individual image styles.
+
+**imageStylePrefix**: (Default: '') any string, that get's added before the generated name.
 
 **convertTo**: (Default: null) enables the image_convert style - allowed values are `png`,  `jpg`, `jpeg`, `jpe`, `gif`, `webp`
 
