@@ -46,7 +46,7 @@ describe('Running image generator tests', function () {
             })
 
             // just in case no exception is thrown
-            expect(res).to.be.false;
+            expect(res).to.be.true;
         } catch (e) {
             expect(e.message).to.equal(`Your drupal installation is missing the focal_point module. Please enable it before generating the image styles.`);
         }

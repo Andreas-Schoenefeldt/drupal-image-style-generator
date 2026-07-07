@@ -55,6 +55,16 @@ module.exports = function (options) {
         throw new Error(`Your configured theme has no ${breakpointsFile} theme breakpoints file. Please read the documentation and double check your options.`);
     }
 
+    const modulesConf = yaml.load(fs.readFileSync(modulesFile, 'utf8')).module;
+    const installedModules = Object.keys(modulesConf).filter((moduleName) => {return modulesConf[moduleName] !== 0;});
+
+    const hasFocalPoint = installedModules.indexOf('focal_point') !== -1;
+    const hasCrop = installedModules.indexOf('crop') !== -1;
+
+    if (!hasFocalPoint && !hasCrop) {
+        console.warn('Please consider installing focal point for better cropping results.');
+    }
+
     // read the breakpoints file
     const bpConf = yaml.load(fs.readFileSync(breakpointsFile, 'utf8'));
 
@@ -96,8 +106,6 @@ module.exports = function (options) {
 
                     if (responsiveImageStyles[styleId].manual_crop) {
                         requiredModules['crop'] = true;
-                    } else {
-                        requiredModules['focal_point'] = true;
                     }
                 }
 
@@ -243,10 +251,14 @@ module.exports = function (options) {
                     styleHeight = responsiveImageStyles[styleId].height ? responsiveImageStyles[styleId].height * multiplyNum : Math.round(styleWidth * aspectRatio);
 
                     // generate the filename
-                    styleLabel = `Scale and Crop ${styleWidth} x ${styleHeight}`;
+                    styleLabel = `Scale and Crop (${styleWidth}x${styleHeight})`;
                     concreteStyleId = `${IMAGE_STYLE_PREFIX}sc_${styleWidth}x${styleHeight}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
+
+                    const dependencies = hasFocalPoint ? {
+                        module: ['focal_point']
+                    } : {};
 
                     styleYml = fs.existsSync(styleFilePath) ?
                         yaml.load(fs.readFileSync(styleFilePath, 'utf8')) :
@@ -254,16 +266,16 @@ module.exports = function (options) {
                             uuid: uniqueId,
                             langcode: 'de',
                             status: true,
-                            dependencies: {
-                                module: ['focal_point']
-                            },
+                            dependencies: dependencies,
                             name: concreteStyleId,
                             label: styleLabel,
                             effects: {}
                         }
                     ;
 
-                    const scaleEffect = helpers.getEffectByTypeId('focal_point_scale_and_crop', styleYml.effects);
+                    const scaleAndCropTypeId = hasFocalPoint ? 'focal_point_scale_and_crop' : 'image_scale_and_crop';
+
+                    const scaleEffect = helpers.getEffectByTypeId(scaleAndCropTypeId, styleYml.effects);
                     const convertEffect = helpers.getEffectByTypeId('image_convert', styleYml.effects);
 
                     hasChanges = !scaleEffect || scaleEffect.data.width !== styleWidth || scaleEffect.data.height !== styleHeight ||
@@ -274,28 +286,36 @@ module.exports = function (options) {
                         styleYml.effects = {};
 
                         if (convertTo) {
-                            const convertEffectId = v4();
+                            const convertEffectId = convertEffect?.uuid || v4();
                             styleYml.effects[convertEffectId] = {
                                 uuid: convertEffectId,
                                 id: 'image_convert',
-                                weight: -1,
+                                weight: 1,
                                 data: {
                                     extension: convertTo
                                 }
                             }
                         }
 
-                        const effectId = v4();
-                        styleYml.effects[effectId] = {
+                        const effectId = scaleEffect?.uuid || v4();
+
+                        const effect = {
                             uuid: effectId,
-                            id: 'focal_point_scale_and_crop',
-                            weight: 1,
+                            id: scaleAndCropTypeId,
+                            weight: 2,
                             data: {
                                 width: styleWidth,
                                 height: responsiveImageStyles[styleId].height ? responsiveImageStyles[styleId].height * multiplyNum : Math.round(styleWidth * responsiveImageStyles[styleId].aspectRatio),
-                                crop_type: 'focal_point'
                             }
                         };
+
+                        if (hasFocalPoint) {
+                            effect.data.crop_type = 'focal_point';
+                        } else {
+                            effect.data.anchor = 'center-center'
+                        }
+
+                        styleYml.effects[effectId] = effect;
                     }
                 } else if (responsiveImageStyles[styleId].height) {
                     // this is a height style
@@ -333,7 +353,7 @@ module.exports = function (options) {
                             styleYml.effects[convertEffectId] = {
                                 uuid: convertEffectId,
                                 id: 'image_convert',
-                                weight: -1,
+                                weight: 1,
                                 data: {
                                     extension: convertTo
                                 }
@@ -344,7 +364,7 @@ module.exports = function (options) {
                         styleYml.effects[effectId] = {
                             uuid: effectId,
                             id: 'image_scale',
-                            weight: 1,
+                            weight: 2,
                             data: {
                                 width: null,
                                 height: styleHeight,
@@ -389,7 +409,7 @@ module.exports = function (options) {
                             styleYml.effects[convertEffectId] = {
                                 uuid: convertEffectId,
                                 id: 'image_convert',
-                                weight: -1,
+                                weight: 1,
                                 data: {
                                     extension: convertTo
                                 }
@@ -400,7 +420,7 @@ module.exports = function (options) {
                         styleYml.effects[effectId] = {
                             uuid: effectId,
                             id: 'image_scale',
-                            weight: 1,
+                            weight: 2,
                             data: {
                                 width: styleWidth,
                                 height: null,
@@ -432,7 +452,6 @@ module.exports = function (options) {
     });
 
     // test the required modules
-    const modulesConf = yaml.load(fs.readFileSync(modulesFile, 'utf8')).module;
     Object.keys(requiredModules).forEach((moduleName) => {
         if (requiredModules[moduleName] && modulesConf[moduleName] !== 0) {
             throw new Error(`Your drupal installation is missing the ${moduleName} module. Please enable it before generating the image styles.`)
