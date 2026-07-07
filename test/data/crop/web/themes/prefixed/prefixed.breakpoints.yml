@@ -1,0 +1,34 @@
+default.xs: # mobile phones
+  label: XS
+  mediaQuery: '(max-width: 575px)'
+  weight: 0
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    ris_aspect_hero:
+      label: 'Aspect Hero'
+      aspectRatio: 0.87
+      width: 575
+default.md: # large tablets
+  label: MD
+  mediaQuery: '(min-width: 576px) and (max-width: 991px)'
+  weight: 1
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    # assuming, that the breakpoint is at md
+    ris_aspect_hero:
+      width: 660
+default.lg: # desktop
+  label: LG
+  mediaQuery: '(min-width: 992px) and (max-width: 1199px)'
+  weight: 3
+  multipliers:
+    - 1x
+    - 2x
+  imageStyles:
+    ris_aspect_hero:
+      width: 1080
+      aspectRatio: 0.38

@@ -11,6 +11,7 @@ const yaml = require("js-yaml");
  *      syncFolder: string,
  *      gridSize?: number,
  *      convertTo?: string,
+ *      imageStylePrefix?: string,
  *      clearCropTypes?: boolean,
  *      styleConfig?: {outDir: string, format?: 'scss', classPrefix?: string}
  *  }} options
@@ -33,6 +34,7 @@ module.exports = function (options) {
     const themeName = options.themeName;
     const syncFolder = options.syncFolder;
     const IMAGE_STYLE_GRID_SIZE = options.gridSize || 1; // this means, every style will be rounded up to the next divisible number of this
+    const IMAGE_STYLE_PREFIX = options.imageStylePrefix || '';
 
     const styleConfig = options.styleConfig || false;
     const styles = {};
@@ -169,7 +171,7 @@ module.exports = function (options) {
                     }
 
                     styleLabel = `Manual Crop and Scale ${styleWidth}, aspect ${cropDimensions[0]}:${cropDimensions[1]}`;
-                    concreteStyleId = `mc_${styleWidth}_${cropType}`;
+                    concreteStyleId = `${IMAGE_STYLE_PREFIX}mc_${styleWidth}_${cropType}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
 
@@ -242,7 +244,7 @@ module.exports = function (options) {
 
                     // generate the filename
                     styleLabel = `Scale and Crop ${styleWidth} x ${styleHeight}`;
-                    concreteStyleId = `sc_${styleWidth}x${styleHeight}`;
+                    concreteStyleId = `${IMAGE_STYLE_PREFIX}sc_${styleWidth}x${styleHeight}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
 
@@ -299,7 +301,7 @@ module.exports = function (options) {
                     // this is a height style
                     const styleHeight = responsiveImageStyles[styleId].heights[bpName] * multiplyNum;
                     styleLabel = `Scale Height ${styleHeight}`;
-                    concreteStyleId = `sh_${styleHeight}`;
+                    concreteStyleId = `${IMAGE_STYLE_PREFIX}sh_${styleHeight}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
 
@@ -355,7 +357,7 @@ module.exports = function (options) {
 
                     // generate the filename
                     styleLabel = `Scale ${styleWidth}`;
-                    concreteStyleId = `s_${styleWidth}`;
+                    concreteStyleId = `${IMAGE_STYLE_PREFIX}s_${styleWidth}`;
                     styleFileName = `image.style.${concreteStyleId}.yml`;
                     styleFilePath = `${syncFolder}/${styleFileName}`;
 
@@ -550,7 +552,7 @@ ${Object.keys(styles[bpId].styles).map(styleId => {
 
     configFiles.forEach(file => {
         if (
-            ((file.indexOf('image.style.sc_') === 0 || file.indexOf('image.style.s_') === 0 || file.indexOf('image.style.mc_') === 0) && !usedStyleConfigs[file]) ||
+            ((file.indexOf(`image.style.${IMAGE_STYLE_PREFIX}sc_`) === 0 || file.indexOf(`image.style.${IMAGE_STYLE_PREFIX}s_`) === 0 || file.indexOf(`image.style.${IMAGE_STYLE_PREFIX}mc_`) === 0) && !usedStyleConfigs[file]) ||
             (options.clearCropTypes && file.indexOf('crop.type.aspect_') === 0 && !usedCropTypes[file])
         ) {
             fs.rmSync(`${syncFolder}/${file}`);

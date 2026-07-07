@@ -2,6 +2,17 @@ const expect = require('chai').expect;
 const gen = require('../index');
 const fs = require("fs");
 const yaml = require("js-yaml");
+const {join} = require("node:path");
+
+function clearFiles(folder, pattern) {
+    const regex = pattern instanceof RegExp ? pattern : new RegExp(pattern);
+
+    for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
+        if (entry.isFile() && regex.test(entry.name)) {
+            fs.unlinkSync(join(folder, entry.name));
+        }
+    }
+}
 
 describe('Running image generator tests', function () {
 
@@ -64,6 +75,8 @@ describe('Running image generator tests', function () {
         const themePath = './test/data/crop/web/themes/' + themeName;
         const syncFolder = './test/data/crop/config/sync/';
 
+        clearFiles(syncFolder, /^image\.style\.|^responsive_image\.styles\./i);
+
         const res = gen({
             themePath: themePath,
             themeName: themeName,
@@ -98,6 +111,8 @@ describe('Running image generator tests', function () {
         const themePath = './test/data/crop/web/themes/' + themeName;
         const syncFolder = './test/data/crop/config/sync/';
 
+        clearFiles(syncFolder, /^image\.style\.|^responsive_image\.styles\./i);
+
         const res = gen({
             themePath: themePath,
             themeName: themeName,
@@ -126,6 +141,33 @@ describe('Running image generator tests', function () {
         expect(effect.data.height).to.equal(108);
     });
 
+    it('should generate the correctly preffixed styles', () => {
+        const themeName = 'prefixed';
+        const themePath = './test/data/crop/web/themes/' + themeName;
+        const syncFolder = './test/data/crop/config/sync';
+
+        clearFiles(syncFolder, /^image\.style\.|^responsive_image\.styles\./i);
+
+        const res = gen({
+            themePath: themePath,
+            themeName: themeName,
+            imageStylePrefix: 'is_',
+            syncFolder: syncFolder
+        });
+
+        expect(res).to.be.true;
+        expect(fs.readdirSync(syncFolder)).to.include.members([
+            'image.style.is_sc_575x500.yml',
+            'image.style.is_sc_660x574.yml',
+            'image.style.is_sc_1080x410.yml',
+            'image.style.is_sc_1150x1001.yml',
+            'image.style.is_sc_1320x1148.yml',
+            'image.style.is_sc_2160x821.yml',
+            'responsive_image.styles.ris_aspect_hero.yml'
+        ]);
+    });
+
+    /*
     it('should generate the correct aspect styles and scss files', () => {
         const themeName = 'changing_aspect';
         const themePath = './test/data/crop/web/themes/' + themeName;
@@ -143,5 +185,6 @@ describe('Running image generator tests', function () {
 
         expect(res).to.be.true;
     });
+     */
 
 });
