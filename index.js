@@ -56,7 +56,7 @@ module.exports = function (options) {
     }
 
     const modulesConf = yaml.load(fs.readFileSync(modulesFile, 'utf8')).module;
-    const installedModules = Object.keys(modulesConf).filter((moduleName) => {return modulesConf[moduleName] !== 0;});
+    const installedModules = Object.keys(modulesConf);
 
     const hasFocalPoint = installedModules.indexOf('focal_point') !== -1;
     const hasCrop = installedModules.indexOf('crop') !== -1;

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-    "release": "grunt release"
+    "release": "npx release"
   },
   "repository": {
     "type": "git",
@@ -22,16 +22,13 @@
   "homepage": "https://github.com/Andreas-Schoenefeldt/drupal-image-style-generator#readme",
   "devDependencies": {
     "chai": "^6.2.2",
-    "grunt": "^1.6.1",
-    "grunt-bump": "^0.8.0",
-    "grunt-prompt": "^1.3.3",
-    "grunt-shell": "^4.0.0",
-    "mocha": "^11.7.6",
+    "easy-release-cli": "^1.0.2",
+    "mocha": "^12.0.0",
     "semver": "^7.3.8"
   },
   "dependencies": {
     "fancy-log": "^2.0.0",
     "js-yaml": "^4.1.0",
-    "uuid": "^9.0.1"
+    "uuid": "^14.0.2"
   }
 }
