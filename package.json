@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-    "release": "npx release --main=master"
+    "release": "npx release --main=master && npm login && npm publish"
   },
   "repository": {
     "type": "git",
