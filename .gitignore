@@ -104,9 +104,13 @@ dist
 .tern-port
 
 # testing
-/test/data/crop/config/sync/
+/test/data/crop/config/sync/*
 !/test/data/crop/config/sync/.gitkeep
 !/test/data/crop/config/sync/core.extension.yml
 /test/data/crop/web/themes/changing_aspect/assets/scss/
-/test/data/insufficient_modules/config/sync
+/test/data/insufficient_modules/config/sync/*
 !/test/data/insufficient_modules/config/sync/core.extension.yml
+
+/test/data/crop/config/sync_range/*
+!/test/data/crop/config/sync_range/.gitkeep
+!/test/data/crop/config/sync_range/core.extension.yml

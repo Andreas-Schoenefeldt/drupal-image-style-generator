@@ -3,6 +3,7 @@ const helpers = require('./src/helpers');
 const path = require("path");
 const fs = require("fs");
 const yaml = require("js-yaml");
+const mediaQueryParser = require("media-query-parser");
 
 /**
  * @param {{
@@ -70,7 +71,6 @@ module.exports = function (options) {
 
     Object.keys(bpConf).forEach((bpName) => {
         const bp = bpConf[bpName];
-        let regex = /max-width:\s+(\d+)px/gmi;
 
         if (styleConfig) {
             styles[bpName] = {
@@ -79,13 +79,13 @@ module.exports = function (options) {
             }
         }
 
-        let m = regex.exec(bp.mediaQuery);
-        let parsedWidth = m ? parseInt(m[1], 10) : null;
+        let parsedWidth;
 
-        if (!parsedWidth) {
-            regex = /min-width:\s+(\d+)px/gmi;
-            m = regex.exec(bp.mediaQuery);
-            parsedWidth = m ? parseInt(m[1], 10) : null;
+        if (mediaQueryParser.parseMediaQuery(bp.mediaQuery)?.condition?.nodes) {
+            mediaQueryParser.parseMediaQuery(bp.mediaQuery).condition.nodes.forEach((node) => {
+                if (['max-width', 'min-width', 'width'].indexOf(node.node.feature) === -1) return;
+                parsedWidth = node.node.maxValue?.value || node.node.minValue?.value || node.node.value?.value;
+            })
         }
 
         // update all available image styles

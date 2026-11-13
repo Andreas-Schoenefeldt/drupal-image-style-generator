@@ -29,6 +29,7 @@
   "dependencies": {
     "fancy-log": "^2.0.0",
     "js-yaml": "^4.1.0",
+    "media-query-parser": "^3.0.2",
     "uuid": "^14.0.2"
   }
 }
